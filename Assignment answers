@@ -1,0 +1,176 @@
+Question--1:-
+answers:-
+
+
+const express = require('express');
+const mysql = require('mysql');
+
+const app = express();
+const port = 3000;
+
+// MySQL Configuration
+const connection = mysql.createConnection({
+  host: 'localhost',
+  user: 'username',
+  password: 'password',
+  database: 'database_name'
+});
+
+connection.connect(err => {
+  if (err) {
+    console.error('Error connecting to MySQL:', err);
+    return;
+  }
+  console.log('Connected to MySQL database');
+});
+
+// Add Customer API
+app.post('/api/customers', (req, res) => {
+  const { phone_number, name } = req.body;
+
+  // Validate input parameters
+  if (!phone_number || !name) {
+    return res.status(400).json({ error: 'Phone number and name are required.' });
+  }
+
+  // Check for duplicate phone number
+  connection.query('SELECT * FROM customers WHERE phone_number = ?', [phone_number], (err, results) => {
+    if (err) {
+      console.error('Error querying the database:', err);
+      return res.status(500).json({ error: 'An error occurred while checking for duplicates.' });
+    }
+
+    if (results.length > 0) {
+      return res.status(409).json({ error: 'Customer with the provided phone number already exists.' });
+    }
+
+    // Add customer to the database
+    connection.query('INSERT INTO customers (phone_number, name) VALUES (?, ?)', [phone_number, name], (err) => {
+      if (err) {
+        console.error('Error inserting customer into the database:', err);
+        return res.status(500).json({ error: 'An error occurred while adding the customer.' });
+      }
+
+      return res.status(201).json({ message: 'Customer added successfully.' });
+    });
+  });
+});
+
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
+});
+
+
+Question--2:-
+Answer:-SELECT c.customerId, c.name, GROUP_CONCAT(s.subjectName ORDER BY s.subjectName ASC SEPARATOR ',') AS subjects
+FROM customers c
+LEFT JOIN subject_student_mapping m ON c.customerId = m.customerId
+LEFT JOIN subjects s ON m.subjectId = s.subjectId
+GROUP BY c.customerId, c.name
+ORDER BY c.customerId ASC;
+
+
+
+
+Question--3:-
+Answer:-const mysql = require('mysql');
+
+const connection = mysql.createConnection({
+  host: 'localhost',
+  user: 'username',
+  password: 'password',
+  database: 'database_name'
+});
+
+connection.connect(err => {
+  if (err) {
+    console.error('Error connecting to MySQL:', err);
+    return;
+  }
+  console.log('Connected to MySQL database');
+});
+
+function insertCustomers(customers) {
+  customers.forEach(customer => {
+    const { name, email } = customer;
+    const query = 'INSERT INTO customers (name, email) VALUES (?, ?) ON DUPLICATE KEY UPDATE name = ?';
+
+    connection.query(query, [name, email, name], (err, results) => {
+      if (err) {
+        console.error('Error inserting customer into the database:', err);
+      }
+    });
+  });
+}
+
+// Example usage
+const customers = [
+  { name: 'Ravi', email: 'ravi123@gmail.com' },
+  { name: 'Kishan', email: 'kishan11@gmail.com' },
+  { name: 'Sameer', email: 'sameer44@gmail.com' }
+];
+
+insertCustomers(customers);
+
+
+Question--4:-
+Answer:-const person = {
+  id: 2,
+  gender: 'mail'
+};
+
+const student = {
+  name: 'ravi',
+  email: 'ravi11@yopmail.com'
+};
+
+const combinedObject = {
+  ...person,
+  ...student
+};
+
+console.log(combinedObject);
+
+
+
+Question--5:-
+Answer:-const request = require('request');
+
+function getGoogleHomePage() {
+  return new Promise((resolve, reject) => {
+    request('http://www.google.com', function (error, response, body) {
+      if (error) {
+        console.error('Error:', error);
+        reject(error);
+      } else {
+        console.log('statusCode:', response && response.statusCode);
+        console.log('body:', body);
+        resolve(body);
+      }
+    });
+  });
+}
+
+getGoogleHomePage()
+  .then(result => {
+    console.log('RESULT==>', result);
+  })
+  .catch(error => {
+    console.error('An error occurred:', error);
+  });
+
+
+Question--6:-
+Answer:-function findMissingNumber(numbers) {
+  const sumOfNumbers = numbers.reduce((sum, num) => sum + num, 0);
+  const sumOfRange = (100 * 101) / 2; // Sum of numbers from 1 to 100
+
+  const missingNumber = sumOfRange - sumOfNumbers;
+  return missingNumber;
+}
+
+// Example usage
+const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, /*...*/, 99, 100]; // Randomly ordered array of numbers from 1 to 100 with one missing number
+
+const missingNumber = findMissingNumber(numbers);
+console.log('Missing Number:', missingNumber);
